@@ -157,6 +157,34 @@ void display(void)
     {
         if (coord_vec.size() > 2) // can make polygon if at least more than two vertices
         {
+            glPointSize(10); // sets the size of points to be drawn (in pixels)
+            glColor3f(0.0, 0.0, 0.0);
+            for (int i = 0; i < coord_vec.size(); i++)
+            {
+                glBegin(GL_POINTS); // writes pixels on the frame buffer with the current drawing color
+                glVertex2i(coord_vec[i].x, coord_vec[i].y);   // sets vertex
+
+                glEnd();
+            }
+
+            for (int i = 0; i < coord_vec.size(); i++)
+            {
+                if (i + 1 <= coord_vec.size() - 1)
+                {
+                    glBegin(GL_LINES);
+                    glVertex2i(coord_vec[i].x, coord_vec[i].y);
+                    glVertex2i(coord_vec[i+1].x, coord_vec[i+1].y);
+                    
+                    glEnd();
+                    if (i + 1 > coord_vec.size() - 1) // at last vertex so need to save the last two coordinate points
+                    {
+                        last_line_coord_vec.clear();
+                        last_line_coord_vec.push_back(coord_vec[i]);
+                        last_line_coord_vec.push_back(coord_vec[i-1]);
+                    }
+                }
+            }
+            glColor3f(1.0, 0.0, 0.0);
             glBegin(GL_POLYGON);
             for (int i = 0; i < coord_vec.size(); i++)
             {
@@ -193,7 +221,6 @@ void onMouseMove(int mousex, int mousey)
         x = mousex*2;
         y = fbHeight-(mousey*2);
         
-        std::cout << x << std::endl;
         glColor3f(0.0, 0.0, 0.0);
         glEnable(GL_COLOR_LOGIC_OP);
         
