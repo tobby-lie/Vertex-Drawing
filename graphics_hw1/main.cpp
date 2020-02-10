@@ -184,7 +184,7 @@ void display(void)
                     }
                 }
             }
-            glColor3f(1.0, 0.0, 0.0);
+            glColor3f(0.7f, 0.18f, 0.28f);
             glBegin(GL_POLYGON);
             for (int i = 0; i < coord_vec.size(); i++)
             {
@@ -202,11 +202,6 @@ void display(void)
     glFlush();     // flushes the frame buffer to the screen
     
     glutSwapBuffers();
-}
-
-void myidle()
-{
-    
 }
 
 void onMouseMove(int mousex, int mousey)
@@ -250,14 +245,16 @@ void reshape(int w, int h)
     
     GLdouble aspect = (GLdouble)fbWidth / (GLdouble)fbHeight;
 
+    glViewport(0, 0, fbWidth, fbHeight);
+    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
     gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
-
-    glViewport(0, 0, fbWidth, fbHeight);
+    glLoadIdentity();
+    
     glutPostRedisplay();
 }
 
