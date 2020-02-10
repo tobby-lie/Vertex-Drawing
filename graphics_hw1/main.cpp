@@ -1,11 +1,10 @@
-
-#include<GLUT/GLUT.h> //includes the opengl, glu, and glut header files
+#include<GLUT/GLUT.h>
 #include <iostream>
 #include <vector>
 #include <tuple>
 
-float x,y = 0;
-bool check = true;
+float x,y = 0; // float values to hold x and y coordinates
+bool check = true; // boolean to check for mouse buttons
 bool filled = false;
 bool g_bDragging = false;
 bool first_click = true;
@@ -97,6 +96,51 @@ void mouse(int button, int state, int mousex, int mousey)
     glutPostRedisplay();
 }
 
+void display_vertices()
+{
+    for (int i = 0; i < coord_vec.size(); i++)
+    {
+        glBegin(GL_POINTS); // writes pixels on the frame buffer with the current drawing color
+        glVertex2i(coord_vec[i].x, coord_vec[i].y);   // sets vertex
+
+        glEnd();
+    }
+}
+
+void display_lines()
+{
+    for (int i = 0; i < coord_vec.size(); i++)
+    {
+        if (i + 1 <= coord_vec.size() - 1)
+        {
+            glBegin(GL_LINES);
+            glVertex2i(coord_vec[i].x, coord_vec[i].y);
+            glVertex2i(coord_vec[i+1].x, coord_vec[i+1].y);
+            
+            glEnd();
+            if (i + 1 > coord_vec.size() - 1) // at last vertex so need to save the last two coordinate points
+            {
+                last_line_coord_vec.clear();
+                last_line_coord_vec.push_back(coord_vec[i]);
+                last_line_coord_vec.push_back(coord_vec[i-1]);
+            }
+        }
+    }
+}
+
+void fill_polygon()
+{
+    glColor3f(0.7f, 0.18f, 0.28f);
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < coord_vec.size(); i++)
+    {
+        glVertex2i(coord_vec[i].x, coord_vec[i].y);
+    }
+    glEnd();
+    filled = true;
+    first_click = true;
+}
+
 void display(void)
 {
     glClearColor(1, 1, 1, 0); // sets the background color to white light
@@ -113,6 +157,8 @@ void display(void)
         glVertex2i(x, y);
         
         glEnd();
+        
+        glDisable(GL_COLOR_LOGIC_OP);
     }
 
     glMatrixMode(GL_PROJECTION);// sets the current matrix to projection
@@ -127,72 +173,19 @@ void display(void)
     glColor3f(0.0, 0.0, 0.0);
     if(check)
     {
-        for (int i = 0; i < coord_vec.size(); i++)
-        {
-            glBegin(GL_POINTS); // writes pixels on the frame buffer with the current drawing color
-            glVertex2i(coord_vec[i].x, coord_vec[i].y);   // sets vertex
+        display_vertices();
 
-            glEnd();
-        }
-
-        for (int i = 0; i < coord_vec.size(); i++)
-        {
-            if (i + 1 <= coord_vec.size() - 1)
-            {
-                glBegin(GL_LINES);
-                glVertex2i(coord_vec[i].x, coord_vec[i].y);
-                glVertex2i(coord_vec[i+1].x, coord_vec[i+1].y);
-                
-                glEnd();
-                if (i + 1 > coord_vec.size() - 1) // at last vertex so need to save the last two coordinate points
-                {
-                    last_line_coord_vec.clear();
-                    last_line_coord_vec.push_back(coord_vec[i]);
-                    last_line_coord_vec.push_back(coord_vec[i-1]);
-                }
-            }
-        }
+        display_lines();
     }
     else
     {
         if (coord_vec.size() > 2) // can make polygon if at least more than two vertices
         {
-            glPointSize(10); // sets the size of points to be drawn (in pixels)
-            glColor3f(0.0, 0.0, 0.0);
-            for (int i = 0; i < coord_vec.size(); i++)
-            {
-                glBegin(GL_POINTS); // writes pixels on the frame buffer with the current drawing color
-                glVertex2i(coord_vec[i].x, coord_vec[i].y);   // sets vertex
+            display_vertices();
 
-                glEnd();
-            }
-
-            for (int i = 0; i < coord_vec.size(); i++)
-            {
-                if (i + 1 <= coord_vec.size() - 1)
-                {
-                    glBegin(GL_LINES);
-                    glVertex2i(coord_vec[i].x, coord_vec[i].y);
-                    glVertex2i(coord_vec[i+1].x, coord_vec[i+1].y);
-                    
-                    glEnd();
-                    if (i + 1 > coord_vec.size() - 1) // at last vertex so need to save the last two coordinate points
-                    {
-                        last_line_coord_vec.clear();
-                        last_line_coord_vec.push_back(coord_vec[i]);
-                        last_line_coord_vec.push_back(coord_vec[i-1]);
-                    }
-                }
-            }
-            glColor3f(0.7f, 0.18f, 0.28f);
-            glBegin(GL_POLYGON);
-            for (int i = 0; i < coord_vec.size(); i++)
-            {
-                glVertex2i(coord_vec[i].x, coord_vec[i].y);
-            }
-            glEnd();
-            filled = true;
-            first_click = true;
+            display_lines();
+            
+            fill_polygon();
         }
         else
         {
@@ -258,20 +251,40 @@ void reshape(int w, int h)
     glutPostRedisplay();
 }
 
+void init (void)
+{
+/* select clearing color     */
+   glClearColor(1, 1, 1, 0); // sets the background color to white light
+
+/* initialize viewing values  */
+   glMatrixMode(GL_PROJECTION);// sets the current matrix to projection
+   glLoadIdentity();//multiply the current matrix by identity matrix
+
+   GLint fbWidth;
+   GLint fbHeight;
+   std::tie(fbWidth, fbHeight) = frame_buffer_coordinates();
+   gluOrtho2D(0.0, fbWidth, 0.0, fbHeight);//sets the parallel(orthographic) projection of the full frame buffer
+}
+
+
 int main(int argc,char** argv)
 {
     glutInit(&argc,argv);
-    glutInitWindowSize(640,480);   //sets the width and height of the window in pixels
-    glutInitWindowPosition(10,10);//sets the position of the window in pixels from top left corner
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);//creates a single frame buffer of RGB color capacity.
-    glutCreateWindow("Vertex Drawing");//creates the window as specified by the user as above.
+    glutInitWindowSize(640,480); // sets the width and height of the window in pixels
+    glutInitWindowPosition(10,10); // sets the position of the window in pixels from top left corner
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); // creates a single frame buffer of RGB color capacity.
+    glutCreateWindow("Vertex Drawing"); // creates the window as specified by the user as above.
+    
+    init(); // call init function
   
-    glutDisplayFunc(display);//links the display event with the display event handler(display)
+    glutDisplayFunc(display); // links the display event with the display event handler(display)
     glutReshapeFunc(reshape);
     
-    glutMouseFunc(mouse);//keyboard event handler
-    glutMotionFunc(onMouseMove);
+    glutMouseFunc(mouse); // mouse event handler
+    glutMotionFunc(onMouseMove); // motion event handler
     
-    glutMainLoop();//loops the current event
+    glutMainLoop(); // loops the current event
+    
+    return 0;
 }
 
