@@ -3,11 +3,18 @@
 #include <vector>
 #include <tuple>
 
+/* GLOBAL FLAGS */
+
 float x,y = 0; // float values to hold x and y coordinates
 bool display_flag = true; // boolean flag to display_flag for mouse buttons
 bool filled = false; // boolean flag for if polygon is filled or not
 bool dragging = false; // boolean flag to display_flag if left mouse button is down
 bool first_click = true; // boolean flag to display_flag if it is the first click
+
+/* GLOBAL FLAGS */
+
+
+/* GLOBAL VARIABLES */
 
 // struct to hold x, y coordinates
 struct Coordinates
@@ -19,6 +26,8 @@ Coordinates temp_coord = {0, 0}; // temporary coordinates for pushing in to vect
 
 std::vector<Coordinates> coord_vec; // vector to hold coordinates
 std::vector<Coordinates> last_line_coord_vec; // will hold values of coordinates that make up last line made
+
+/* GLOBAL VARIABLES */
 
 /*
     Function: frame_buffer_coordinates
@@ -163,7 +172,6 @@ void display_vertices()
     }
 } // end display_vertices
 
-
 /*
     Function: display_lines
  
@@ -301,7 +309,6 @@ void display(void)
     glutSwapBuffers(); // swap buffers for double buffer for smoother animations
 } // end display
 
-
 /*
     Function: onMouseMove
  
@@ -369,34 +376,46 @@ void reshape(int w, int h)
     // get aspect from fbWidth and fbHeight
     GLdouble aspect = (GLdouble)fbWidth / (GLdouble)fbHeight;
 
+    // set viewport
     glViewport(0, 0, fbWidth, fbHeight);
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION); // sets the current matrix to projection
+    glLoadIdentity(); //multiply the current matrix by identity matrix
 
     gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW); // sets the current matrix to modelview
+    glLoadIdentity(); // multiply the current matrix by identity matrix
     
-    glutPostRedisplay();
-}
+    glutPostRedisplay(); // redisplay
+} // end reshape
 
-void init (void)
+/*
+    Function: init
+ 
+    Description: Initializes all settings.
+ 
+    Parameters: None
+ 
+    Pre-Conditions: None
+ 
+    Post-Conditions: Window settings should be initialized.
+ 
+    Returns: Nothing
+*/
+void init(void)
 {
-/* select clearing color     */
-   glClearColor(1, 1, 1, 0); // sets the background color to white light
+    glClearColor(1, 1, 1, 0); // sets the background color to white light
 
-/* initialize viewing values  */
-   glMatrixMode(GL_PROJECTION);// sets the current matrix to projection
-   glLoadIdentity();//multiply the current matrix by identity matrix
+    glMatrixMode(GL_PROJECTION); // sets the current matrix to projection
+    glLoadIdentity(); //multiply the current matrix by identity matrix
 
-   GLint fbWidth;
-   GLint fbHeight;
-   std::tie(fbWidth, fbHeight) = frame_buffer_coordinates();
-   gluOrtho2D(0.0, fbWidth, 0.0, fbHeight);//sets the parallel(orthographic) projection of the full frame buffer
-}
-
+    // get frame buffer width and height
+    GLint fbWidth;
+    GLint fbHeight;
+    std::tie(fbWidth, fbHeight) = frame_buffer_coordinates();
+    gluOrtho2D(0.0, fbWidth, 0.0, fbHeight);//sets the parallel(orthographic) projection of the full frame buffer
+} // end init
 
 int main(int argc,char** argv)
 {
@@ -408,8 +427,8 @@ int main(int argc,char** argv)
     
     init(); // call init function
   
-    glutDisplayFunc(display); // links the display event with the display event handler(display)
-    glutReshapeFunc(reshape);
+    glutDisplayFunc(display); // links the display function with display event handler
+    glutReshapeFunc(reshape); // links the reshape function with reshape event handler
     
     glutMouseFunc(onMouseClick); // mouse event handler
     glutMotionFunc(onMouseMove); // motion event handler
@@ -418,4 +437,3 @@ int main(int argc,char** argv)
     
     return 0;
 }
-
