@@ -1,3 +1,9 @@
+/*
+ Tobby Lie
+ Intro to Graphics HW 1
+ 2/11/20
+*/
+
 #include<GLUT/GLUT.h>
 #include <iostream>
 #include <vector>
