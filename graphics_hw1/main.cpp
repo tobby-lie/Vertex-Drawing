@@ -4,6 +4,8 @@
  2/11/20
 */
 
+#define GL_SILENCE_DEPRECATION // silence deprecation warnings
+
 #include<GLUT/GLUT.h>
 #include <iostream>
 #include <vector>
