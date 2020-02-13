@@ -18,6 +18,8 @@ bool display_flag = true; // boolean flag to display_flag for mouse buttons
 bool filled = false; // boolean flag for if polygon is filled or not
 bool dragging = false; // boolean flag to display_flag if left mouse button is down
 bool first_click = true; // boolean flag to display_flag if it is the first click
+float width_old = 0.0; // holds value of old width for rescaling
+float height_old = 0.0; // holds value of old height for rescaling
 
 /* GLOBAL FLAGS */
 
@@ -118,7 +120,7 @@ void onMouseClick(int button, int state, int mousex, int mousey)
     
     else if (button==GLUT_LEFT_BUTTON && state==GLUT_UP) // left mouse button released
     {
-        if (filled) //  if polygon filled
+        if (filled) // if polygon filled
         {
             glClearColor(1, 1, 1, 0);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -280,13 +282,13 @@ void display(void)
     }
 
     glMatrixMode(GL_PROJECTION); // sets the current matrix to projection
-    glLoadIdentity(); //multiply the current matrix by identity matrix
+    glLoadIdentity(); // multiply the current matrix by identity matrix
 
     // get frame buffer width and height
     GLint fbWidth;
     GLint fbHeight;
     std::tie(fbWidth, fbHeight) = frame_buffer_coordinates();
-    gluOrtho2D(0.0, fbWidth, 0.0, fbHeight); //sets the parallel(orthographic) projection of the full frame buffer
+    gluOrtho2D(0.0, fbWidth, 0.0, fbHeight); // sets the parallel(orthographic) projection of the full frame buffer
 
     glPointSize(10); // sets the size of points to be drawn
     glColor3f(0.0, 0.0, 0.0); // set color of points to black
@@ -363,39 +365,32 @@ void onMouseMove(int mousex, int mousey)
 /*
     Function: reshape
  
-    Description: Handles logic for reshaping window
+    Description: Handles logic for reshaping window and polygon
  
     Parameters: int w, int h
  
     Pre-Conditions: None
  
-    Post-Conditions: Window is scaled while pixels anchored to
-        bottom left corner.
+    Post-Conditions: Shapes in window are rescaled
  
     Returns: Nothing
 */
 void reshape(int w, int h)
 {
-    // get frame buffer width and height
     GLint fbWidth;
     GLint fbHeight;
     std::tie(fbWidth, fbHeight) = frame_buffer_coordinates();
     
-    // get aspect from fbWidth and fbHeight
-    GLdouble aspect = (GLdouble)fbWidth / (GLdouble)fbHeight;
+    std::vector<Coordinates>::iterator it; // iterator for vector
+    for(it = coord_vec.begin(); it != coord_vec.end(); it++)
+    {
+        it->x = (it->x*fbWidth)/width_old; // get new coordinates with respect to new width
 
-    // set viewport
-    glViewport(0, 0, fbWidth, fbHeight);
-    
-    glMatrixMode(GL_PROJECTION); // sets the current matrix to projection
-    glLoadIdentity(); //multiply the current matrix by identity matrix
+        it->y = (it->y*fbHeight)/height_old; // get new coordinates with respect to new height
+    }
+    width_old = fbWidth; // reassign the old width
+    height_old = fbHeight; // reassign the old height
 
-    gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW); // sets the current matrix to modelview
-    glLoadIdentity(); // multiply the current matrix by identity matrix
-    
-    glutPostRedisplay(); // redisplay
 } // end reshape
 
 /*
@@ -416,13 +411,18 @@ void init(void)
     glClearColor(1, 1, 1, 0); // sets the background color to white light
 
     glMatrixMode(GL_PROJECTION); // sets the current matrix to projection
-    glLoadIdentity(); //multiply the current matrix by identity matrix
+    glLoadIdentity(); // multiply the current matrix by identity matrix
 
     // get frame buffer width and height
     GLint fbWidth;
     GLint fbHeight;
     std::tie(fbWidth, fbHeight) = frame_buffer_coordinates();
-    gluOrtho2D(0.0, fbWidth, 0.0, fbHeight);//sets the parallel(orthographic) projection of the full frame buffer
+    gluOrtho2D(0.0, fbWidth, 0.0, fbHeight); // sets the parallel(orthographic) projection of the full frame buffer
+
+    std::tie(fbWidth, fbHeight) = frame_buffer_coordinates();
+    width_old = fbWidth; // get the first width
+    height_old = fbHeight; // get the first height
+
 } // end init
 
 int main(int argc,char** argv)
